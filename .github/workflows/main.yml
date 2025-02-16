@@ -3,7 +3,7 @@ name: Create Sentry Release
 on:
   push:
     branches:
-      - master
+      - main  # Sesuaikan dengan nama branch utama Anda
 
 jobs:
   release:
@@ -15,20 +15,18 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Install dependencies
+      - name: Install Sentry CLI
         run: |
-          npm install
+          curl -sL https://sentry.io/get-cli/ | bash
 
-      - name: Build project
-        run: |
-          npm run build
-
-      - name: Create Sentry release
-        uses: getsentry/action-release@v1
+      - name: Set up Sentry release
         env:
           SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
-          SENTRY_ORG: ${{ secrets.SENTRY_ORG }}
-          SENTRY_PROJECT: ${{ secrets.SENTRY_PROJECT }}
-        with:
-          environment: production
-          version: "v1.3.4"
+        run: |
+          export SENTRY_ORG=syuaib
+          export SENTRY_PROJECT=absen-siswa
+          export VERSION=$(sentry-cli releases propose-version)
+
+          sentry-cli releases new "$VERSION"
+          sentry-cli releases set-commits "$VERSION" --auto
+          sentry-cli releases finalize "$VERSION"
