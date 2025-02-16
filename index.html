@@ -6,16 +6,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>Document</title>
     <link rel="stylesheet" href="/bootstrap-5.3.3-dist/css/bootstrap.min.css">
-    <script
-    src="https://js.sentry-cdn.com/5c34ec738c35e93eea8d6b5f4d1010af.min.js"
-    crossorigin="anonymous"
-  ></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/default.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/styles/atom-one-dark-reasonable.min.css" integrity="sha512-RwXJS3k4Z0IK6TGoL3pgQlA9g2THFhKL7z9TYWdAI8u6xK0AUuMWieJuWgTRayywC9A94ifUj1RzjDa1NIlUIg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <script src="https://js.sentry-cdn.com/5c34ec738c35e93eea8d6b5f4d1010af.min.js" crossorigin="anonymous"></script>
 </head>
 
 <body>
     <div id="header"></div>
-    <div class="container">
-
+    <div class="container mt-3">
+        <p id="tanggal">Tanggal : </p>
         <div id="hasil" class="border w-100 p-3 mb-3 overflow-auto" style="margin-top: 70px;">
             <table class="table table-striped">
                 <!-- No	Nama Siswa	NISN Status -->
@@ -33,7 +32,12 @@
             </table>
         </div>
         <button class="btn btn-primary" onclick="scanning()">Scan</button>
-    <span id="pesan"></span>
+    </div>
+
+    <div class="container-fluid mt-5">
+        <pre class="mb-0">Log :</pre>
+        <pre>
+            <code class="highlight-javascript" id="pesan">...</code></pre>
     </div>
 
     <!-- Modal Loading -->
@@ -50,16 +54,15 @@
         </div>
     </div>
 
+
     <script src="/bootstrap-5.3.3-dist/js/bootstrap.min.js"></script>
     <script src="/jquery/jquery.js"></script>
     <script src="/template-generator.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
     <script defer>
         generateTemplate("load", "#header", "header")
     </script>
     <script src="/js/script.js"></script>
-    <script>
-       
-    </script>
 </body>
 
 </html>
