@@ -7,10 +7,15 @@ function scanning() {
 function setHasil(hasil_scan) {
   $("#pesan").text(hasil_scan);
 
-  ambilDataSiswa("hasil scan", { bln_thn: "1/2025", nisn: hasil_scan });
+  ambilDataSiswa("hasil scan", {  nisn: hasil_scan });
 }
 
-ambilDataSiswa("ambil data siswa", { bln_thn: "1/2025" });
+const dt = new Date()
+const bln = dt.getDate()
+const thn = dt.getFullYear()
+const bln_thn = `${bln}/${thn}`
+
+ambilDataSiswa("ambil data siswa", {bln_thn: bln_thn});
 
 function ambilDataSiswa(flag, obj = {}) {
   $(".modal-backdrop").show();
