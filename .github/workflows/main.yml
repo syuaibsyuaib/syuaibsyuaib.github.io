@@ -3,7 +3,7 @@ name: Create Sentry Release
 on:
   push:
     branches:
-      - main  # Sesuaikan dengan nama branch utama Anda
+      - master  # Sesuaikan dengan nama branch utama Anda
 
 jobs:
   release:
