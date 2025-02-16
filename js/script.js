@@ -4,44 +4,29 @@ function scanning() {
   window.AppInventor.setWebViewString("scan");
 }
 
-function setHasil(hasil) {
-  $("#pesan").text(hasil);
-  fetch(urlScript, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      flag: "hasil",
-      data: hasil,
-    }),
-  })
-    .then((res) => res.json())
-    .then((res) => {
-        $("#pesan").text(res);
-      //   document.getElementById("hasil").innerHTML = res.pesan;
-    })
-    .catch((err) => {
-        $("#pesan").text(res);
-    });
+function setHasil(hasil_scan) {
+  $("#pesan").text(hasil_scan);
+
+  ambilDataSiswa("hasil scan", { bln_thn: "1/2025", nisn: hasil_scan });
 }
 
-ambilDataSiswa();
-function ambilDataSiswa() {
+ambilDataSiswa("ambil data siswa", { bln_thn: "1/2025" });
+
+function ambilDataSiswa(flag, obj = {}) {
   $(".modal-backdrop").show();
   $("#loading").show();
   fetch(urlScript, {
     method: "POST",
     body: JSON.stringify({
-      flag: "ambil data siswa",
-      data: "1/2025",
+      flag: flag,
+      obj: obj,
     }),
   })
     .then((res) => res.json())
     .then((res) => {
       let data = res.pesan;
       $("#pesan").text(data);
-      generateTableContent(data)
+      generateTableContent(data);
       $("#loading").hide();
       $(".modal-backdrop").remove();
     })
