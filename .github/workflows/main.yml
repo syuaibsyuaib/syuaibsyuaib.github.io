@@ -3,7 +3,7 @@ name: Create Sentry Release
 on:
   push:
     branches:
-      - master  # Sesuaikan dengan nama branch utama Anda
+      - master
 
 jobs:
   release:
@@ -17,12 +17,10 @@ jobs:
 
       - name: Install dependencies
         run: |
-          # Perintah untuk menginstal dependensi proyek Anda
           npm install
 
       - name: Build project
         run: |
-          # Perintah untuk membangun proyek Anda
           npm run build
 
       - name: Create Sentry release
