@@ -1,13 +1,36 @@
-- uses: actions/checkout@v4
-  with:
-    fetch-depth: 0
+name: Create Sentry Release
 
-- name: Create Sentry release
-  uses: getsentry/action-release@v1
-  env:
-    SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
-    SENTRY_ORG: ${{ secrets.SENTRY_ORG }}
-    SENTRY_PROJECT: ${{ secrets.SENTRY_PROJECT }}
-  with:
-    environment: production
-    version: "v1.3.4"
+on:
+  push:
+    branches:
+      - master  # Sesuaikan dengan nama branch utama Anda
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install dependencies
+        run: |
+          # Perintah untuk menginstal dependensi proyek Anda
+          npm install
+
+      - name: Build project
+        run: |
+          # Perintah untuk membangun proyek Anda
+          npm run build
+
+      - name: Create Sentry release
+        uses: getsentry/action-release@v1
+        env:
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+          SENTRY_ORG: ${{ secrets.SENTRY_ORG }}
+          SENTRY_PROJECT: ${{ secrets.SENTRY_PROJECT }}
+        with:
+          environment: production
+          version: "v1.3.4"
