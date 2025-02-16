@@ -11,7 +11,7 @@ function setHasil(hasil_scan) {
 }
 
 const dt = new Date()
-const bln = dt.getDate()
+const bln = dt.getMonth()
 const thn = dt.getFullYear()
 const bln_thn = `${bln}/${thn}`
 
