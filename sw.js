@@ -1,99 +1,109 @@
 importScripts("https://www.gstatic.com/firebasejs/11.2.0/firebase-app-compat.js");
 importScripts("https://www.gstatic.com/firebasejs/11.2.0/firebase-messaging-compat.js");
 
-// const HOSTNAME_WHITELIST = [self.location.hostname, "www.highperformanceformat.com", "pl25732847.profitablecpmrate.com", "unpkg.com","cdn.glitch.global", "thinnerlanguish.com","fonts.gstatic.com", "fonts.googleapis.com", "cdn.jsdelivr.net", "play.google.com", "thelifewillbefine.de", "code.jquery.com", "script.google.com", "www.gstatic.com"];
-const HOSTNAME_WHITELIST = [self.location.hostname];
-// const CACHE_FILES = ["/", "index.html", "icons/windows11/LargeTile.scale-100.png", "icons/windows11/SmallTile.scale-100.png", "icons/windows11/Square44x44Logo.scale-100.png", "icons/windows11/Square150x150Logo.scale-100.png", "icons/windows11/Square310x310Logo.scale-100.png", "icons/windows11/Square70x70Logo.scale-100.png", "icons/windows11/Wide310x150Logo.scale-100.png", "icons/windows11/SplashScreen.scale-100.png", "lagioff.html"];
-// const CACHE_FILES = ["/wandering/", "/wandering/lagioff.html", "/wandering/script.js", "/wandering/style.css", "/wandering/icons/"]
-const CACHE_FILES = ["/", "lagioff.html", "wandering/lagioff.html", "/lagioff.html"]
+const CACHE_NAME = "pwa-cache-v2";
+const CACHE_FILES = [
+  "./",
+  "./index.html",
+  "./lagioff.html",
+  "./script.js",
+  "./style.css",
+  "./template.js",
+  "./manifest.json",
+  "./icons/android/android-launchericon-96-96.png",
+  "./icons/windows11/Square44x44Logo.targetsize-32.png",
+  "./icons/windows11/Square44x44Logo.targetsize-16.png"
+];
 
-// The Util Function to hack URLs of intercepted requests
-const getFixedUrl = (req) => {
-  var now = Date.now();
-  var url = new URL(req.url);
+const HOSTNAME_WHITELIST = [
+  self.location.hostname,
+  "fonts.googleapis.com",
+  "fonts.gstatic.com",
+  "cdn.jsdelivr.net",
+  "code.jquery.com",
+  "unpkg.com",
+  "www.gstatic.com"
+];
 
-  url.protocol = self.location.protocol;
-
-  if (url.hostname === self.location.hostname) {
-    url.search += (url.search ? "&" : "?") + "cache-bust=" + now;
-  }
-  return url.href;
-};
+/**
+ *  @Lifecycle Install
+ */
+self.addEventListener("install", (event) => {
+  console.log("Service Worker: Installing...");
+  event.waitUntil(
+    caches.open(CACHE_NAME).then((cache) => {
+      console.log("Service Worker: Caching Files");
+      return cache.addAll(CACHE_FILES);
+    })
+  );
+  self.skipWaiting();
+});
 
 /**
  *  @Lifecycle Activate
- *  New one activated when old isnt being used.
- *
- *  waitUntil(): activating ====> activated
  */
 self.addEventListener("activate", (event) => {
-  event.waitUntil(self.clients.claim());
-});
-
-// self.addEventListener("activate", (event) => {
-//   event.waitUntil(
-//     caches.keys().then((cacheNames) => {
-//       return Promise.all(
-//         cacheNames.map((cache) => {
-//           if (cache !== CACHE_FILES) {
-//             console.log("Deleting old cache:", cache);
-//             return caches.delete(cache);
-//           }
-//         })
-//       );
-//     })
-//   );
-// });
-/**
- *  @Lifecycle Install
- *  Service Worker installing.
- */
-
-
-self.addEventListener("install", (event) => {
-  console.log("Service Worker installing.");
+  console.log("Service Worker: Activated");
   event.waitUntil(
-    caches
-      .open("pwa-cache-v1")
-      .then((cache) => {
-        return cache.addAll(["/wandering/lagioff.html"]);
-      })
-      .catch((error) => {
-        console.error("Failed to cache resources:", error);
-      })
+    caches.keys().then((cacheNames) => {
+      return Promise.all(
+        cacheNames.map((cache) => {
+          if (cache !== CACHE_NAME) {
+            console.log("Service Worker: Clearing Old Cache", cache);
+            return caches.delete(cache);
+          }
+        })
+      );
+    })
   );
+  return self.clients.claim();
 });
 
 /**
  *  @Functional Fetch
- *  All network requests are being intercepted here.
- *
- *  void respondWith(Promise<Response> r)
  */
 self.addEventListener("fetch", (event) => {
+  // Skip cross-origin requests that are not in whitelist
   const requestUrl = new URL(event.request.url);
   if (!HOSTNAME_WHITELIST.includes(requestUrl.hostname)) {
-    event.respondWith(fetch(event.request).catch(() => caches.match("/wandering/lagioff.html")));
     return;
   }
 
+  // Handle navigation requests (HTML)
+  if (event.request.mode === "navigate") {
+    event.respondWith(
+      fetch(event.request).catch(() => {
+        return caches.match("./lagioff.html");
+      })
+    );
+    return;
+  }
+
+  // Cache-first strategy for other assets
   event.respondWith(
-    caches.match(event.request).then((cached) => {
-      if (cached) {
-        return cached;
+    caches.match(event.request).then((cachedResponse) => {
+      if (cachedResponse) {
+        return cachedResponse;
       }
 
-      return fetch(getFixedUrl(event.request), { cache: "no-store" })
-        .then((response) => {
-          if (!response || response.status !== 200 || response.type !== "basic") {
-            return response;
-          }
-
-          const responseClone = response.clone();
-          caches.open("pwa-cache-v1").then((cache) => cache.put(event.request, responseClone));
-          return response;
-        })
-        .catch(() => caches.match("/wandering/lagioff.html"));
+      return fetch(event.request).then((networkResponse) => {
+        // Only cache successful same-origin responses
+        if (
+          networkResponse &&
+          networkResponse.status === 200 &&
+          networkResponse.type === "basic" &&
+          event.request.method === "GET"
+        ) {
+          const responseToCache = networkResponse.clone();
+          caches.open(CACHE_NAME).then((cache) => {
+            cache.put(event.request, responseToCache);
+          });
+        }
+        return networkResponse;
+      }).catch(() => {
+        // If fetch fails (offline) and not in cache, just return error
+        // except for images maybe? For now, just let it fail.
+      });
     })
   );
 });
@@ -131,10 +141,3 @@ self.addEventListener("notificationclick", (event) => {
   event.notification.close();
   event.waitUntil(clients.openWindow(event.notification.data.click_action));
 });
-
-self.options = {
-  "domain": "3nbf4.com",
-  "zoneId": 10411654
-}
-self.lary = ""
-importScripts('https://3nbf4.com/act/files/service-worker.min.js?r=sw')
